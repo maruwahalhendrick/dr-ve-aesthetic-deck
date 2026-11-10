@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="id" data-lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Google Maps Audit // Dr Ve Aesthetic Clinic Sukabumi</title>
+    
+    <!-- Google Fonts & Tailwind CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --bg-canvas: #FFFFFF;
+            --bg-surface: #F8FAFC;
+            --bg-surface-elevated: #FFFFFF;
+            --bg-card-hover: #F1F5F9;
+            
+            --border-light: #E2E8F0;
+            --border-accent: rgba(159, 73, 110, 0.28);
+            --border-focus: #9F496E;
+            
+            --text-heading: #0F172A;
+            --text-body: #334155;
+            --text-muted: #475569;
+            --text-faint: #64748B;
+            
+            /* Medical Aesthetic Palette */
+            --clinic-primary: #9F496E;
+            --clinic-dark: #64243F;
+            --clinic-gold: #B45309;
+            --clinic-soft: rgba(159, 73, 110, 0.08);
+            
+            /* Status Accents */
+            --alert-red: #DC2626;
+            --alert-red-soft: rgba(220, 38, 38, 0.08);
+            --alert-red-border: rgba(220, 38, 38, 0.25);
+            
+            --success-green: #059669;
+            --success-green-soft: rgba(5, 150, 105, 0.08);
+            --success-green-border: rgba(5, 150, 105, 0.25);
+            
+            --font-serif: 'DM Serif Display', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+            
+            --shadow-subtle: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+            --shadow-card: 0 10px 30px -4px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.04);
+            --shadow-elevated: 0 20px 40px -8px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.06);
+        }
+
+        /* Language Toggle Visibility Rules */
+        html[data-lang="en"] .t-id { display: none !important; }
+        html[data-lang="en"] .t-en { display: inline !important; }
+        html[data-lang="en"] blockquote.t-en, 
+        html[data-lang="en"] div.t-en, 
+        html[data-lang="en"] p.t-en, 
+        html[data-lang="en"] h1.t-en, 
+        html[data-lang="en"] h2.t-en, 
+        html[data-lang="en"] h3.t-en, 
+        html[data-lang="en"] span.t-en-block { display: block !important; }
+
+        html[data-lang="id"] .t-en { display: none !important; }
+        html[data-lang="id"] .t-id { display: inline !important; }
+        html[data-lang="id"] blockquote.t-id, 
+        html[data-lang="id"] div.t-id, 
+        html[data-lang="id"] p.t-id, 
+        html[data-lang="id"] h1.t-id, 
+        html[data-lang="id"] h2.t-id, 
+        html[data-lang="id"] h3.t-id, 
+        html[data-lang="id"] span.t-id-block { display: block !important; }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: #F1F5F9;
+            color: var(--text-body);
+            overflow-x: hidden;
+            width: 100vw;
+            min-height: 100vh;
+        }
+
+        /* DESKTOP 16:9 VIEWPORT WRAPPER */
+        #deckViewport {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: var(--bg-canvas);
+            touch-action: pan-x pan-y pinch-zoom;
+        }
+
+        #deckStage {
+            width: 1920px;
+            height: 1080px;
+            background: var(--bg-canvas);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            overflow: hidden;
+            box-shadow: none;
+            transition: transform 0.15s ease-out;
+        }
+
+        /* SLIDE CONTAINER */
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 48px 84px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 1;
+            background: var(--bg-canvas);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        /* TYPOGRAPHY */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1.5px solid var(--border-light);
+            font-family: var(--font-mono);
+            font-size: 13.5px;
+            color: var(--text-faint);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1.5px solid var(--border-light);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-faint);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .kicker {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--clinic-primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .kicker::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--clinic-primary);
+            border-radius: 2px;
+        }
+
+        .title-hero {
+            font-family: var(--font-serif);
+            font-size: 46px;
+            line-height: 1.15;
+            color: var(--text-heading);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .title-slide {
+            font-family: var(--font-serif);
+            font-size: 40px;
+            line-height: 1.18;
+            color: var(--text-heading);
+            font-weight: 700;
+            letter-spacing: -0.015em;
+        }
+
+        .text-lead {
+            font-size: 18.5px;
+            line-height: 1.58;
+            color: var(--text-body);
+            font-weight: 400;
+        }
+
+        /* CARD BRUTALIST & ELEVATED */
+        .card {
+            background: var(--bg-surface-elevated);
+            border: 1.5px solid var(--border-light);
+            border-radius: 18px;
+            padding: 22px 26px;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .card:hover {
+            box-shadow: var(--shadow-card);
+            border-color: var(--border-focus);
+        }
+
+        .card.accent-clinic {
+            border-left: 6px solid var(--clinic-primary);
+        }
+        .card.accent-red {
+            border-left: 6px solid var(--alert-red);
+            background: #FFFDFD;
+        }
+        .card.accent-green {
+            border-left: 6px solid var(--success-green);
+            background: #FDFEFC;
+        }
+
+        .stat-tile {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-faint);
+            font-weight: 600;
+        }
+        .stat-value {
+            font-family: var(--font-serif);
+            font-size: 44px;
+            font-weight: 800;
+            line-height: 1.05;
+            color: var(--text-heading);
+        }
+        .stat-note {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* COMPARISON TABLE */
+        .cmp-row {
+            display: grid;
+            grid-template-columns: 2.2fr 1fr 1fr 1.2fr 1.6fr;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 15px;
+            align-items: center;
+            border: 1px solid var(--border-light);
+            background: #FFFFFF;
+        }
+        .cmp-row.head {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-faint);
+            background: var(--bg-surface);
+            font-weight: 700;
+            border-color: transparent;
+        }
+        .cmp-row.us {
+            border: 2px solid var(--alert-red);
+            background: var(--alert-red-soft);
+            font-weight: 700;
+        }
+        .cmp-row.comp {
+            background: #FFFFFF;
+        }
+
+        /* SHOT / VIDEO CONTAINER */
+        .shot {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid var(--border-light);
+            background: #000000;
+            aspect-ratio: 16 / 9;
+            box-shadow: var(--shadow-card);
+            cursor: pointer;
+        }
+        .shot video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000000;
+        }
+        .shot-cap {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 16px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+            color: #FFFFFF;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* FLOATING DOCK */
+        .nav-dock {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            z-index: 100;
+        }
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        .lang-switch-btn {
+            background: var(--clinic-primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* GRID UTILS */
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; }
+        .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .badge-clinic { background: var(--clinic-soft); color: var(--clinic-primary); border: 1px solid var(--border-accent); }
+        .badge-green { background: var(--success-green-soft); color: var(--success-green); border: 1px solid var(--success-green-border); }
+        .badge-red { background: var(--alert-red-soft); color: var(--alert-red); border: 1px solid var(--alert-red-border); }
+
+        .step-num {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--clinic-primary);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .diag-tab-btn {
+            background: #F1F5F9;
+            color: var(--text-muted);
+            border: 1.5px solid var(--border-light);
+            transition: all 0.2s;
+        }
+        .diag-tab-btn.active {
+            background: var(--clinic-primary);
+            color: #FFFFFF;
+            border-color: var(--clinic-primary);
+        }
+
+        /* LIGHTBOX MODAL */
+        #lightboxModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.88);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+        #lightboxModal.open {
+            display: flex;
+        }
+        #lightboxContent {
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: #000;
+            position: relative;
+        }
+        #lightboxContent video, #lightboxContent img {
+            max-width: 90vw;
+            max-height: 85vh;
+            display: block;
+        }
+        .close-lightbox-btn {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            color: #fff;
+            font-size: 32px;
+            cursor: pointer;
+            z-index: 1010;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 16:9 VIEWPORT CONTAINER (OPTIMIZED FOR TABLET & RECORDING) -->
+    <div id="deckViewport">
+        <div id="deckStage">
+
+            <!-- ========================================================
+                 SLIDE 00: THE PROBLEM — 5.0 Rating, but only 5 reviews
+                 ======================================================== -->
+            <section class="slide active" id="slide-0">
+                <header class="slide-header">
+                    <span><span class="t-en">NEURALKATS // GOOGLE MAPS AUDIT &bull; DR VE AESTHETIC CLINIC</span><span class="t-id">NEURALKATS // AUDIT GOOGLE MAPS &bull; DR VE AESTHETIC CLINIC</span></span>
+                    <span>SLIDE 00 / 05</span>
+                </header>
+
+                <div class="g2" style="flex: 1; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; margin: 15px 0;">
+                    <div>
+                        <div class="kicker"><span class="t-en">ONE PROBLEM, AND IT IS VISIBLE</span><span class="t-id">MASALAHNYA SATU, DAN KELIHATAN</span></div>
+                        <h1 class="title-hero" style="margin-bottom: 16px;">
+                            <span class="t-en">Your clinical care is proven at <span style="color: var(--clinic-primary);">5.0★</span>. But only <span style="color: var(--alert-red);">5 people</span> have said so on Google.</span>
+                            <span class="t-id">Perawatan klinis Anda sempurna <span style="color: var(--clinic-primary);">5.0★</span>. Tapi baru <span style="color: var(--alert-red);">5 orang</span> yang bilang begitu di Google.</span>
+                        </h1>
+                        <p class="text-lead" style="margin-bottom: 24px;">
+                            <span class="t-en">When patients around Jl. Bhayangkara search for skin &amp; beauty clinics on their phones, they see the numbers below, <strong>not</strong> your medical expertise.</span>
+                            <span class="t-id">Saat calon pasien di sekitar Jl. Bhayangkara mencari klinik kecantikan lewat HP, yang mereka lihat adalah angka-angka di bawah ini, <strong>bukan</strong> keahlian medis dokter Anda.</span>
+                        </p>
+
+                        <div class="g2" style="gap: 16px; margin-bottom: 24px;">
+                            <div class="card stat-tile">
+                                <div class="stat-label"><span class="t-en">Google Rating</span><span class="t-id">Rating Google</span></div>
+                                <div class="stat-value" style="color: var(--success-green);">5.0★</div>
+                                <div class="stat-note"><span class="t-en">Flawless medical reputation</span><span class="t-id">Kualitas medis sempurna tanpa komplain</span></div>
+                            </div>
+                            <div class="card stat-tile accent-red">
+                                <div class="stat-label"><span class="t-en">Number of reviews</span><span class="t-id">Jumlah ulasan</span></div>
+                                <div class="stat-value" style="color: var(--alert-red);">5</div>
+                                <div class="stat-note"><span class="t-en">Lifetime on Google Maps</span><span class="t-id">Seumur hidup di Google Maps</span></div>
+                            </div>
+                            <div class="card stat-tile accent-red">
+                                <div class="stat-label"><span class="t-en">Profile Status</span><span class="t-id">Status Profil Google</span></div>
+                                <div class="stat-value" style="font-size: 32px; color: var(--alert-red);">Unclaimed</div>
+                                <div class="stat-note"><span class="t-en">"Claim this business" still active</span><span class="t-id">"Klaim bisnis ini" masih menyala</span></div>
+                            </div>
+                            <div class="card stat-tile accent-red">
+                                <div class="stat-label"><span class="t-en">Website Status</span><span class="t-id">Status Website</span></div>
+                                <div class="stat-value" style="font-size: 32px; color: var(--alert-red);">Missing</div>
+                                <div class="stat-note"><span class="t-en">Zero treatment catalog linked</span><span class="t-id">Belum ada katalog treatment di listing</span></div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="padding: 12px 20px; display: inline-flex; align-items: center; gap: 14px; border-color: var(--border-accent); background: #FFFFFF;">
+                            <img src="assets/abel_hendrik.jpg" alt="Abel Hendrik" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--clinic-primary);">
+                            <div>
+                                <div style="font-size: 11px; font-family: var(--font-mono); text-transform: uppercase; color: var(--clinic-primary); font-weight: 700;"><span class="t-en">Prepared for Dr Ve Aesthetic Clinic</span><span class="t-id">Disiapkan untuk Pemilik Dr Ve Aesthetic Clinic</span></div>
+                                <div style="font-size: 16px; font-weight: 800; color: var(--text-heading);">Abel Hendrik &bull; NeuralKats, Sukabumi</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Video Playback -->
+                    <div class="shot" onclick="openLightbox('assets/shot-01-profil-google.mp4')" title="Click to enlarge video">
+                        <video poster="assets/shot-01-profil-google.webp" autoplay loop muted playsinline preload="auto">
+                            <source src="assets/shot-01-profil-google.mp4" type="video/mp4">
+                            <source src="assets/shot-01-profil-google.webm" type="video/webm">
+                        </video>
+                        <div class="shot-cap"><span class="t-en">▶ Live Audit Video &bull; Dr Ve Profile (Unclaimed & 5 Reviews)</span><span class="t-id">▶ Video Audit &bull; Profil Dr Ve (Belum Diklaim & 5 Ulasan)</span></div>
+                    </div>
+                </div>
+
+                <footer class="slide-footer">
+                    <span><span class="t-en">SOURCE: GOOGLE MAPS AUDIT &bull; NOVEMBER 2026</span><span class="t-id">SUMBER: AUDIT GOOGLE MAPS &bull; NOVEMBER 2026</span></span>
+                    <span><span class="t-en">PRESS → TO CONTINUE</span><span class="t-id">TEKAN → UNTUK LANJUT</span></span>
+                </footer>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 01: THE EVIDENCE — Jl. Bhayangkara Competitors
+                 ======================================================== -->
+            <section class="slide" id="slide-1">
+                <header class="slide-header">
+                    <span><span class="t-en">01 // THE EVIDENCE ON A PATIENT'S PHONE</span><span class="t-id">01 // BUKTI DI LAYAR HP CALON PASIEN</span></span>
+                    <span>SLIDE 01 / 05</span>
+                </header>
+
+                <div class="g2" style="flex: 1; grid-template-columns: 1.05fr 0.95fr; gap: 44px; align-items: center; margin: 15px 0;">
+                    <div>
+                        <div class="kicker"><span class="t-en">TRY IT YOURSELF, RIGHT NOW</span><span class="t-id">COBA SENDIRI SEKARANG</span></div>
+                        <h2 class="title-slide" style="margin-bottom: 12px;">
+                            <span class="t-en">Search "Klinik Kecantikan Jl. Bhayangkara".<br><span style="color: var(--clinic-primary);">Who wins the patients?</span></span>
+                            <span class="t-id">Cari "Klinik Kecantikan Jl. Bhayangkara".<br><span style="color: var(--clinic-primary);">Klinik mana yang direkomendasikan Google?</span></span>
+                        </h2>
+                        <p class="text-lead" style="margin-bottom: 20px;">
+                            <span class="t-en">On Google Maps, what captures aesthetic patients is <strong>social proof velocity</strong>: total review volume, photo recency, and verified clinical profiles.</span>
+                            <span class="t-id">Di Google Maps, yang memenangkan pasien baru adalah <strong>akumulasi bukti sosial</strong>: total ulasan, foto hasil treatment terbaru, dan verifikasi resmi profil.</span>
+                        </p>
+
+                        <!-- Competitor Comparison Table -->
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px;">
+                            <div class="cmp-row head">
+                                <span><span class="t-en">Clinic</span><span class="t-id">Klinik</span></span>
+                                <span><span class="t-en">Address</span><span class="t-id">Lokasi</span></span>
+                                <span><span class="t-en">Stars</span><span class="t-id">Bintang</span></span>
+                                <span><span class="t-en">Reviews</span><span class="t-id">Ulasan</span></span>
+                                <span><span class="t-en">Status</span><span class="t-id">Status</span></span>
+                            </div>
+                            <div class="cmp-row comp">
+                                <span>Dr Metz Skincare</span>
+                                <span>Jl. Bhayangkara 24</span>
+                                <span>4.8★</span>
+                                <span style="font-weight: 800; color: var(--success-green);">419</span>
+                                <span style="color: var(--success-green); font-weight: 700;"><span class="t-en">Dominating Top 3</span><span class="t-id">Penguasa 3 Besar</span></span>
+                            </div>
+                            <div class="cmp-row comp">
+                                <span>Klinik Irna</span>
+                                <span>Jl. Bhayangkara 34</span>
+                                <span>4.3★</span>
+                                <span>45+</span>
+                                <span style="color: var(--text-muted); font-weight: 600;">Active</span>
+                            </div>
+                            <div class="cmp-row comp">
+                                <span>Naavagreen</span>
+                                <span>Jl. Sudirman 75</span>
+                                <span>5.0★</span>
+                                <span style="font-weight: 800; color: var(--success-green);">1,200+</span>
+                                <span style="color: var(--success-green); font-weight: 700;">Top City Player</span>
+                            </div>
+                            <div class="cmp-row us">
+                                <span>Dr Ve Aesthetic</span>
+                                <span>Jl. Bhayangkara 142</span>
+                                <span>5.0★</span>
+                                <span style="color: var(--alert-red); font-weight: 800;">5</span>
+                                <span style="color: var(--alert-red);"><span class="t-en">Buried in Search</span><span class="t-id">Tenggelam di Google</span></span>
+                            </div>
+                        </div>
+
+                        <div class="card accent-clinic" style="padding: 14px 20px;">
+                            <div style="font-size: 15px; line-height: 1.55; color: var(--text-heading);">
+                                <span class="t-en"><strong>In the exact same street:</strong> Dr Metz has <strong>419 reviews</strong> capturing organic traffic, while Dr Ve sits with <strong>5 reviews</strong> and an unclaimed badge.</span>
+                                <span class="t-id"><strong>Di jalan yang sama persis:</strong> Dr Metz mengantongi <strong>419 ulasan</strong> merebut pasien baru setiap hari, sementara Dr Ve tertahan di <strong>5 ulasan</strong> dengan profil belum diklaim.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Interactive Video Switcher -->
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                        <div style="display: flex; gap: 10px;">
+                            <button id="tabBtnBhayangkara" class="diag-tab-btn active" style="flex: 1; padding: 10px 14px; font-size: 13px; font-weight: 700; font-family: var(--font-mono); border-radius: 10px; cursor: pointer;" onclick="switchVideoSlide1('bhayangkara')">
+                                📍 <span class="t-en">Jl. Bhayangkara Search</span><span class="t-id">Pencarian Jl. Bhayangkara</span>
+                            </button>
+                            <button id="tabBtnSukabumi" class="diag-tab-btn" style="flex: 1; padding: 10px 14px; font-size: 13px; font-weight: 700; font-family: var(--font-mono); border-radius: 10px; cursor: pointer;" onclick="switchVideoSlide1('sukabumi')">
+                                🏙️ <span class="t-en">City-Wide Search</span><span class="t-id">Pencarian Kota Sukabumi</span>
+                            </button>
+                        </div>
+
+                        <div class="shot" id="videoSlotSlide1" onclick="openLightbox(currentSlide1VideoSrc())" title="Click to enlarge video">
+                            <video id="videoPlayerSlide1" poster="assets/shot-02-klinik-bhayangkara.webp" loop muted playsinline preload="none">
+                                <source src="assets/shot-02-klinik-bhayangkara.mp4" type="video/mp4">
+                                <source src="assets/shot-02-klinik-bhayangkara.webm" type="video/webm">
+                            </video>
+                            <div class="shot-cap" id="videoCapSlide1"><span class="t-en">▶ Search: Klinik Kecantikan Jl. Bhayangkara &bull; Dr Metz #1 vs Dr Ve Hidden</span><span class="t-id">▶ Cari: Klinik Kecantikan Jl. Bhayangkara &bull; Dr Metz #1 vs Dr Ve Tenggelam</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="slide-footer">
+                    <span><span class="t-en">SOURCE: GOOGLE MAPS AUDIT &bull; NOVEMBER 2026</span><span class="t-id">SUMBER: AUDIT GOOGLE MAPS &bull; NOVEMBER 2026</span></span>
+                    <span><span class="t-en">NOT ABOUT QUALITY. ABOUT VISIBLE PROOF.</span><span class="t-id">BUKAN SOAL KUALITAS. SOAL BUKTI YANG TERLIHAT.</span></span>
+                </footer>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 02: URGENCY — the cost of doing nothing
+                 ======================================================== -->
+            <section class="slide" id="slide-2">
+                <header class="slide-header">
+                    <span><span class="t-en">02 // THE COST OF DOING NOTHING</span><span class="t-id">02 // BIAYA DARI DIAM</span></span>
+                    <span>SLIDE 02 / 05</span>
+                </header>
+
+                <div class="g2" style="flex: 1; grid-template-columns: 1.05fr 0.95fr; gap: 44px; align-items: center; margin: 15px 0;">
+                    <div>
+                        <div class="kicker"><span class="t-en">HIGH-TICKET CLINICAL MATH</span><span class="t-id">MATEMATIKA TIKET MEDIS TINGGI</span></div>
+                        <h2 class="title-slide" style="margin-bottom: 14px;">
+                            <span class="t-en">When 2 new patients a day pick another clinic,<br><span style="color: var(--clinic-primary);">how much revenue leaks?</span></span>
+                            <span class="t-id">Saat 2 calon pasien baru per hari belok ke klinik lain,<br><span style="color: var(--clinic-primary);">berapa omset yang bocor?</span></span>
+                        </h2>
+                        <p class="text-lead" style="margin-bottom: 20px;">
+                            <span class="t-en">Aesthetic patients do not test clinics randomly. When choosing where to treat their face and skin, they choose whichever clinic has hundreds of verified 5★ reviews.</span>
+                            <span class="t-id">Pasien estetika tidak sembarangan memilih klinik untuk wajah &amp; kulitnya. Mereka akan otomatis memilih klinik dengan ratusan ulasan bintang 5 terverifikasi.</span>
+                        </p>
+
+                        <div class="card accent-red" style="padding: 22px 26px; margin-bottom: 16px; border-width: 2px;">
+                            <div class="stat-label" style="color: var(--alert-red);"><span class="t-en">Monthly Revenue Leaking to Competitors</span><span class="t-id">Omset yang Bocor ke Kompetitor per Bulan</span></div>
+                            <div style="font-family: var(--font-mono); font-size: 42px; font-weight: 800; color: var(--alert-red); line-height: 1.1;">
+                                <span class="t-en">Rp21,000,000 / mo</span><span class="t-id">Rp21.000.000 / bln</span>
+                            </div>
+                            <div style="font-size: 15px; color: var(--text-body); margin-top: 6px; line-height: 1.5;">
+                                <span class="t-en">2 patients/day &times; Rp350,000 avg treatment &times; 30 days = <strong>Rp252,000,000/year lost</strong></span>
+                                <span class="t-id">2 pasien baru/hari &times; rata-rata treatment Rp350.000 &times; 30 hari = <strong>Rp252 Juta/tahun potensi hilang</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="card accent-green" style="padding: 18px 24px; margin-bottom: 12px;">
+                            <div class="stat-label" style="color: var(--success-green);"><span class="t-en">If NFC Tap Routine Runs at Reception</span><span class="t-id">Kalau Alur Tap NFC di Meja Resepsionis Jalan</span></div>
+                            <div style="font-size: 17px; line-height: 1.5; color: var(--text-heading);">
+                                <span class="t-en">15 satisfied patients/day &times; 20% tap review = <strong>3 reviews/day (~90 reviews/month)</strong>.<br>Current state: <strong>5 reviews lifetime</strong>.</span>
+                                <span class="t-id">15 pasien puas per hari &times; 20% tap ulasan = <strong>3 ulasan/hari (~90 ulasan/bulan)</strong>.<br>Kondisi sekarang: <strong>5 ulasan seumur hidup</strong>.</span>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 12.5px; color: var(--text-muted); font-family: var(--font-mono); line-height: 1.5;">
+                            <span class="t-en">* Illustrative simulation for skin treatment average ticket.</span>
+                            <span class="t-id">* Simulasi ilustratif dengan rata-rata nilai tindakan medis &amp; perawatan kulit.</span>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Video of Unclaimed Profile & Empty Website -->
+                    <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+                        <div class="card accent-red" style="padding: 16px 20px; border-width: 1.5px;">
+                            <div style="font-weight: 800; font-size: 16px; color: var(--alert-red); margin-bottom: 4px;">
+                                <span class="t-en">⚠️ Unclaimed Profile Invites Hijacking & Suspicion</span>
+                                <span class="t-id">⚠️ Profil Belum Diklaim Mengundang Keraguan Pasien</span>
+                            </div>
+                            <div style="font-size: 14px; color: var(--text-body); line-height: 1.5;">
+                                <span class="t-en">The "Claim this business" badge tells savvy patients the profile is unmanaged, with zero official website or treatment price transparency.</span>
+                                <span class="t-id">Tautan "Klaim bisnis ini" memberi sinyal profil tidak dikelola resmi, tanpa website katalog dan harga tindakan yang transparan.</span>
+                            </div>
+                        </div>
+
+                        <div class="shot" onclick="openLightbox('assets/shot-04-unclaimed-profile.mp4')" title="Click to enlarge video">
+                            <video poster="assets/shot-04-unclaimed-profile.webp" loop muted playsinline preload="none">
+                                <source src="assets/shot-04-unclaimed-profile.mp4" type="video/mp4">
+                                <source src="assets/shot-04-unclaimed-profile.webm" type="video/webm">
+                            </video>
+                            <div class="shot-cap"><span class="t-en">▶ Unclaimed Status &amp; Missing Treatment Catalog</span><span class="t-id">▶ Bukti Status Belum Diklaim &amp; Website Belum Terpasang</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="slide-footer">
+                    <span><span class="t-en">SOURCE: GOOGLE MAPS AUDIT &bull; NOVEMBER 2026</span><span class="t-id">SUMBER: AUDIT GOOGLE MAPS &bull; NOVEMBER 2026</span></span>
+                    <span><span class="t-en">DOING NOTHING IS ALSO A DECISION, AND IT HAS A PRICE</span><span class="t-id">DIAM JUGA KEPUTUSAN, DAN ADA HARGANYA</span></span>
+                </footer>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 03: THE SOLUTION — one system, three steps
+                 ======================================================== -->
+            <section class="slide" id="slide-3">
+                <header class="slide-header">
+                    <span><span class="t-en">03 // THE SYSTEM</span><span class="t-id">03 // SISTEMNYA</span></span>
+                    <span>SLIDE 03 / 05</span>
+                </header>
+
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin: 15px 0;">
+                    <div class="kicker"><span class="t-en">ONE SYSTEM, THREE STEPS</span><span class="t-id">SATU SISTEM, TIGA LANGKAH</span></div>
+                    <h2 class="title-slide" style="margin-bottom: 14px;">
+                        <span class="t-en">Happy patients become visible proof on Google,<br><span style="color: var(--clinic-primary);">and that proof brings new consultations 24/7.</span></span>
+                        <span class="t-id">Pasien puas jadi bukti nyata di Google,<br><span style="color: var(--clinic-primary);">bukti itu mendatangkan pasien baru setiap hari.</span></span>
+                    </h2>
+                    <p class="text-lead" style="max-width: 1350px; margin-bottom: 30px;">
+                        <span class="t-en">Not random social media dances, and not expensive ads that stop the second budget runs out. A clinical reputation system installed at your reception desk, maintained and grown by us.</span>
+                        <span class="t-id">Bukan konten joget medsos acak dan bukan iklan boncos yang mati saat saldo habis. Ini sistem reputasi medis yang terpasang di meja kasir Anda, kami yang memasang dan merawatnya.</span>
+                    </p>
+
+                    <div class="g3" style="gap: 24px; margin-bottom: 26px;">
+                        <div class="card accent-clinic" style="padding: 28px;">
+                            <div class="step-num">1</div>
+                            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-heading); margin: 8px 0 10px;"><span class="t-en">Storefront: Official Profile Claimed</span><span class="t-id">Etalase: Profil Google Diklaim &amp; Rapi</span></h3>
+                            <p style="font-size: 16px; line-height: 1.6; color: var(--text-body);"><span class="t-en">Official verification, sterile room photos, doctor practice hours, treatment list, and high-intent local SEO keywords so Dr Ve ranks top in Sukabumi.</span><span class="t-id">Verifikasi resmi kepemilikan, foto ruang tindakan steril, jam praktek dokter, daftar treatment, dan kata kunci lokal agar Dr Ve mendominasi pencarian Sukabumi.</span></p>
+                        </div>
+                        <div class="card accent-clinic" style="padding: 28px;">
+                            <div class="step-num">2</div>
+                            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-heading); margin: 8px 0 10px;"><span class="t-en">Proof: NFC Review Card at Reception</span><span class="t-id">Bukti: Kartu Review NFC di Kasir</span></h3>
+                            <p style="font-size: 16px; line-height: 1.6; color: var(--text-body);"><span class="t-en">An acrylic Google Review NFC card at the cashier desk. Receptionist guides in 5 seconds while settling payment: patient taps phone, 5★ review submitted in 10 seconds.</span><span class="t-id">Kartu akrilik Google Review NFC di meja kasir. Resepsionis memandu 5 detik saat pelunasan: pasien tap HP, ulasan bintang 5 selesai kurang dari 10 detik.</span></p>
+                        </div>
+                        <div class="card accent-clinic" style="padding: 28px;">
+                            <div class="step-num">3</div>
+                            <h3 style="font-size: 24px; font-weight: 800; color: var(--text-heading); margin: 8px 0 10px;"><span class="t-en">Consultation: Web Catalog + WhatsApp</span><span class="t-id">Reservasi: Web Treatment + WhatsApp</span></h3>
+                            <p style="font-size: 16px; line-height: 1.6; color: var(--text-body);"><span class="t-en">A modern, clean treatment catalog linked to the profile. Patients explore services and book consultation appointments directly via WhatsApp without 3rd-party fees.</span><span class="t-id">Katalog web modern &amp; bersih terpasang di profil. Calon pasien bisa pelajari treatment dan langsung booking jadwal konsultasi via WhatsApp tanpa potongan komisi.</span></p>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-left: 6px solid var(--success-green); background: #FFFFFF;">
+                        <div style="font-size: 18px; font-weight: 700; color: var(--text-heading);">
+                            <span class="t-en">Profile claimed &rarr; 5★ reviews multiply &rarr; higher Google rank &rarr; new patients book direct</span><span class="t-id">Profil diklaim &rarr; ulasan 5★ berlipat ganda &rarr; naik peringkat 1 &rarr; pasien baru langsung booking</span>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--success-green); white-space: nowrap;">
+                            <span class="t-en">SYSTEM ACTIVE IN 7 DAYS</span><span class="t-id">AKTIF DALAM 7 HARI KERJA</span>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="slide-footer">
+                    <span>NEURALKATS // CLINICAL REPUTATION SYSTEM</span>
+                    <span><span class="t-en">ONE SYSTEM. THREE STEPS.</span><span class="t-id">SATU SISTEM. TIGA LANGKAH.</span></span>
+                </footer>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 04: THE OFFER — Business Booster
+                 ======================================================== -->
+            <section class="slide" id="slide-4">
+                <header class="slide-header">
+                    <span><span class="t-en">04 // THE OFFER</span><span class="t-id">04 // PENAWARAN</span></span>
+                    <span>SLIDE 04 / 05</span>
+                </header>
+
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin: 15px 0;">
+                    <div class="kicker">BUSINESS BOOSTER PACKAGE</div>
+                    <h2 class="title-slide" style="margin-bottom: 14px;">
+                        <span class="t-en">You are not buying an agency retainer,<br><span style="color: var(--clinic-primary);">but a medical reputation asset we install, run, and maintain.</span></span>
+                        <span class="t-id">Yang Anda dapat bukan biaya agensi fiktif,<br><span style="color: var(--clinic-primary);">tapi aset reputasi medis yang kami pasang, jalankan, dan rawat.</span></span>
+                    </h2>
+                    <p class="text-lead" style="max-width: 1350px; margin-bottom: 26px;">
+                        <span class="t-en">Month one installs and activates the system. Every month after protects and grows your search dominance.</span><span class="t-id">Bulan pertama untuk memasang dan mengaktifkan sistemnya. Bulan berikutnya untuk merawat dan memperkokoh dominasi ranking Anda.</span>
+                    </p>
+
+                    <div class="g2" style="gap: 28px; margin-bottom: 20px;">
+                        <div class="card" style="border-top: 6px solid var(--clinic-primary); padding: 26px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div>
+                                    <span class="badge badge-clinic" style="margin-bottom: 8px;"><span class="t-en">MONTH 1 &bull; INSTALL &amp; ACTIVATE</span><span class="t-id">BULAN 1 &bull; PASANG &amp; AKTIVASI</span></span>
+                                    <h3 style="font-size: 24px; font-weight: 800; color: var(--text-heading);"><span class="t-en">Setup &amp; Activation</span><span class="t-id">Setup &amp; Aktivasi Lengkap</span></h3>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-family: var(--font-mono); font-size: 32px; font-weight: 800; color: var(--clinic-primary);"><span class="t-en">Rp1,800,000</span><span class="t-id">Rp1.800.000</span></div>
+                                    <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);"><span class="t-en">ONE-TIME INVESTMENT</span><span class="t-id">SEKALI INVESTASI</span></div>
+                                </div>
+                            </div>
+                            <ul style="font-size: 16px; color: var(--text-body); line-height: 1.55; display: flex; flex-direction: column; gap: 9px; list-style: none;">
+                                <li>✓ <span class="t-en"><strong>Google Profile Claimed &amp; Verified</strong>: medical category, clinical photos, hours, local SEO</span><span class="t-id"><strong>Profil Google Diklaim &amp; Diverifikasi</strong>: kategori medis, foto steril, jam operasional, SEO lokal</span></li>
+                                <li>✓ <span class="t-en"><strong>2x Acrylic Google Review NFC Cards</strong> for Reception Desk + 5s receptionist prompt script</span><span class="t-id"><strong>2x Kartu Akrilik Google Review NFC</strong> Meja Resepsionis + skrip kasir 5 detik</span></li>
+                                <li>✓ <span class="t-en"><strong>Aesthetic Treatment Catalog Web</strong> + Direct WhatsApp Booking integration</span><span class="t-id"><strong>Website Katalog Treatment</strong> + integrasi langsung reservasi WhatsApp</span></li>
+                                <li>✓ <span class="t-en"><strong>Competitor Intelligence Audit</strong> (Dr Metz, Naavagreen benchmark gap analysis)</span><span class="t-id"><strong>Audit Intelejen Kompetitor</strong> (analisis gap Dr Metz, Naavagreen di Sukabumi)</span></li>
+                                <li>✓ <span class="t-en"><strong>Month 1 Performance Report</strong>: ranking position, review velocity, patient conversions</span><span class="t-id"><strong>Laporan Hasil Bulan 1</strong>: pergerakan ranking, ulasan masuk, konversi pasien</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="card accent-green" style="border-top: 6px solid var(--success-green); padding: 26px; border-width: 2px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div>
+                                    <span class="badge badge-green" style="margin-bottom: 8px;"><span class="t-en">MONTH 2 ONWARD &bull; MAINTAIN &amp; SCALE</span><span class="t-id">BULAN 2 DST &bull; RAWAT &amp; TUMBUH</span></span>
+                                    <h3 style="font-size: 24px; font-weight: 800; color: var(--text-heading);"><span class="t-en">Maintenance</span><span class="t-id">Perawatan Rutin</span></h3>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-family: var(--font-mono); font-size: 32px; font-weight: 800; color: var(--success-green);"><span class="t-en">Rp800,000</span><span class="t-id">Rp800.000</span></div>
+                                    <div style="font-size: 12px; color: var(--success-green); font-family: var(--font-mono);"><span class="t-en">/ MONTH (≈ RP26,600/DAY)</span><span class="t-id">/ BULAN (± RP26.600/HARI)</span></div>
+                                </div>
+                            </div>
+                            <ul style="font-size: 16px; color: var(--text-body); line-height: 1.55; display: flex; flex-direction: column; gap: 9px; list-style: none;">
+                                <li>✓ <span class="t-en"><strong>Professional Review Management</strong>: monitoring &amp; ethical doctor-tone replies to all reviews</span><span class="t-id"><strong>Manajemen Ulasan Profesional</strong>: pemantauan &amp; balasan santun profesional dokter</span></li>
+                                <li>✓ <span class="t-en"><strong>Maintain Profile &amp; Treatment Web</strong>: promo updates, speed check, SEO keyword refresh</span><span class="t-id"><strong>Rawat Profil &amp; Website Katalog</strong>: update promo klinik, kecepatan, penyegaran kata kunci</span></li>
+                                <li>✓ <span class="t-en"><strong>Monthly Growth &amp; Defense Report</strong>: review growth, local search share, competitor tracking</span><span class="t-id"><strong>Laporan Bulanan</strong>: pertumbuhan review, dominasi pencarian, gerak kompetitor</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding: 16px 26px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-left: 6px solid var(--success-green); background: #FFFFFF;">
+                        <div style="font-size: 18px; color: var(--text-heading); line-height: 1.5;">
+                            <span class="t-en"><strong>Break-even clinical math:</strong> Rp800,000 = <strong>2 single facial / skin treatments a month</strong>. Rp1,800,000 = <strong>5 treatments</strong>.</span>
+                            <span class="t-id"><strong>Hitungan impas klinis:</strong> Rp800.000 = <strong>Cukup 2 pasien facial / treatment per bulan</strong>. Rp1.800.000 = <strong>5 pasien</strong>.</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); text-align: right;">
+                            <span class="t-en">ASSUMES AVERAGE<br>TREATMENT OF Rp350,000</span><span class="t-id">ASUMSI TREATMENT<br>RATA-RATA Rp350.000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="slide-footer">
+                    <span><span class="t-en">BUSINESS BOOSTER // MONTH 1: RP1.8M · MONTH 2 ONWARD: RP800K</span><span class="t-id">BUSINESS BOOSTER // BULAN 1: RP1,8 JUTA · BULAN 2 DST: RP800 RIBU</span></span>
+                    <span><span class="t-en">A PERMANENT ASSET, NOT RANDOM ADS</span><span class="t-id">ASET PERMANEN, BUKAN IKLAN ACIS</span></span>
+                </footer>
+            </section>
+
+            <!-- ========================================================
+                 SLIDE 05: GUARANTEE + QUOTA + CTA
+                 ======================================================== -->
+            <section class="slide" id="slide-5">
+                <header class="slide-header">
+                    <span><span class="t-en">05 // THE RISK IS ON US</span><span class="t-id">05 // RISIKO ADA DI KAMI</span></span>
+                    <span>SLIDE 05 / 05</span>
+                </header>
+
+                <div class="g2" style="flex: 1; grid-template-columns: 1.1fr 0.9fr; gap: 44px; align-items: center; margin: 15px 0;">
+                    <div>
+                        <div class="kicker"><span class="t-en">UNLOSEABLE BET &bull; 100% RISK REVERSAL</span><span class="t-id">JAMINAN TERTULIS 100% TANPA RISIKO</span></div>
+                        <h2 class="title-slide" style="margin-bottom: 14px;">
+                            <span class="t-en">No verified growth after month 1?<br><span style="color: var(--clinic-primary);">We continue month 2 completely free.</span></span>
+                            <span class="t-id">Bulan 1 tidak ada penambahan ulasan?<br><span style="color: var(--clinic-primary);">Bulan 2 kami lanjutkan 100% gratis.</span></span>
+                        </h2>
+
+                        <div class="card accent-green" style="padding: 26px 30px; border-width: 2px; margin-bottom: 14px;">
+                            <div style="font-size: 17px; font-weight: 700; color: var(--text-heading); margin-bottom: 12px;">
+                                <span class="t-en">At the end of month 1, we have not delivered if you still do not see:</span><span class="t-id">Di akhir bulan 1, kami dianggap gagal dan belum selesai jika:</span>
+                            </div>
+                            <ul style="font-size: 17px; color: var(--text-body); line-height: 1.5; display: flex; flex-direction: column; gap: 8px; list-style: none; margin-bottom: 16px;">
+                                <li>✕ <span class="t-en">Official Google profile verified &amp; fully optimized</span><span class="t-id">Profil Google belum terverifikasi &amp; dioptimasi</span></li>
+                                <li>✕ <span class="t-en">At least 30+ new verified 5★ reviews added to your clinic</span><span class="t-id">Belum bertambah minimal 30+ ulasan bintang 5 baru</span></li>
+                                <li>✕ <span class="t-en">Treatment catalog website finished &amp; connected to WhatsApp</span><span class="t-id">Website katalog treatment belum aktif di WhatsApp</span></li>
+                                <li>✕ <span class="t-en">Clear, transparent ranking &amp; conversion report delivered</span><span class="t-id">Belum ada laporan pergerakan ranking yang transparan</span></li>
+                            </ul>
+                            <div style="font-size: 18px; font-weight: 800; color: var(--success-green); line-height: 1.45;">
+                                <span class="t-en">&rarr; Month 2 maintenance (Rp800,000 value) is 100% FREE until results are proven.</span><span class="t-id">&rarr; Perawatan bulan ke-2 (senilai Rp800.000) 100% GRATIS sampai hasil terbukti.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 18px;">
+                        <div class="card accent-clinic" style="padding: 22px 28px; border-width: 2px;">
+                            <div class="stat-label" style="color: var(--clinic-primary);"><span class="t-en">Territorial Exclusivity Quota</span><span class="t-id">Kuota Eksklusivitas Wilayah</span></div>
+                            <div style="font-size: 24px; font-weight: 800; color: var(--text-heading); line-height: 1.35;">
+                                <span class="t-en">Maximum 1 aesthetic clinic per 2 km radius.</span><span class="t-id">Maksimal 1 klinik kecantikan per radius 2 km.</span>
+                            </div>
+                            <div style="font-size: 15px; color: var(--text-body); margin-top: 6px; line-height: 1.5;">
+                                <span class="t-en">The Jl. Bhayangkara &amp; Gunungpuyuh sector is open for Dr Ve. Once locked, we strictly refuse to take another aesthetic clinic in the same radius.</span><span class="t-id">Sektor Jl. Bhayangkara &amp; Gunungpuyuh masih terbuka untuk Dr Ve. Setelah terkunci, kami menolak klinik kecantikan kompetitor di radius yang sama.</span>
+                            </div>
+                        </div>
+
+                        <div class="card" style="padding: 26px 30px; border-width: 2px; border-color: var(--border-accent); text-align: center;">
+                            <div style="font-size: 13px; font-family: var(--font-mono); text-transform: uppercase; color: var(--clinic-primary); font-weight: 700; margin-bottom: 6px;">
+                                <span class="t-en">Ready to dominate Jl. Bhayangkara?</span><span class="t-id">Siap mendominasi Jl. Bhayangkara?</span>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 16px;">
+                                <img src="assets/abel_hendrik.jpg" alt="Abel Hendrik" style="width: 68px; height: 68px; border-radius: 50%; object-fit: cover; border: 3px solid var(--clinic-primary);">
+                                <div style="text-align: left;">
+                                    <div style="font-size: 22px; font-weight: 800; color: var(--text-heading); font-family: var(--font-serif);">Abel Hendrik</div>
+                                    <div style="font-size: 13px; color: var(--text-muted); font-family: var(--font-mono);">Founder, NeuralKats &bull; Sukabumi</div>
+                                    <div style="font-size: 14px; color: var(--clinic-primary); font-weight: 700;">WhatsApp: +62 898-6617-589</div>
+                                </div>
+                            </div>
+
+                            <a id="waLink" href="https://wa.me/628986617589?text=Halo%20Abel%2C%20saya%20sudah%20lihat%20audit%20Google%20Maps%20Dr%20Ve%20Aesthetic%20Clinic.%20Saya%20tertarik%20konsultasi%20Business%20Booster." target="_blank" rel="noopener noreferrer" style="font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: #FFFFFF; background: var(--clinic-primary); text-decoration: none; padding: 14px 28px; border-radius: 50px; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 18px rgba(159, 73, 110, 0.4);">
+                                💬 <span class="t-en">Confirm on WhatsApp to secure your clinic slot</span><span class="t-id">Konfirmasi lewat WhatsApp, amankan kuota klinik Anda</span>
+                            </a>
+
+                            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 16px; flex-wrap: wrap;">
+                                <a href="https://www.instagram.com/maruwahal_hendrick" target="_blank" rel="noopener noreferrer" class="badge badge-clinic" style="padding: 8px 14px; font-size: 12px; text-decoration: none;">📸 @maruwahal_hendrick</a>
+                                <a href="https://www.instagram.com/neuralkats" target="_blank" rel="noopener noreferrer" class="badge badge-clinic" style="padding: 8px 14px; font-size: 12px; text-decoration: none;">🚀 @neuralkats</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="slide-footer">
+                    <span><span class="t-en">CONFIDENTIAL // NEURALKATS FOR DR VE AESTHETIC CLINIC</span><span class="t-id">CONFIDENTIAL // NEURALKATS UNTUK DR VE AESTHETIC CLINIC</span></span>
+                    <span>2026</span>
+                </footer>
+            </section>
+
+        </div>
+    </div>
+
+
+    <!-- FLOATING NAVIGATION & LANGUAGE CONTROLLER BAR -->
+    <nav class="nav-dock">
+        <button class="nav-btn" id="prevBtn" onclick="deck.prev()">
+            <span>&larr;</span> <span>PREV</span>
+        </button>
+
+        <span style="font-family: var(--font-mono); font-size: 14px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.1em;" id="counterDisplay">
+            00 / 05
+        </span>
+
+        <button class="nav-btn" id="nextBtn" onclick="deck.next()">
+            <span>NEXT</span> <span>&rarr;</span>
+        </button>
+
+        <span style="height: 18px; width: 1px; background: rgba(255, 255, 255, 0.2);"></span>
+
+        <!-- Language Switcher Button -->
+        <button class="lang-switch-btn" id="langBtn" onclick="toggleLanguage()">
+            🌐 <span id="langLabel">ID ➔ EN</span>
+        </button>
+
+        <span style="height: 18px; width: 1px; background: rgba(255, 255, 255, 0.2);"></span>
+
+        <!-- Fullscreen Button -->
+        <button class="nav-btn" id="fsBtn" onclick="toggleFullscreen()" title="Toggle Fullscreen" style="padding: 6px 12px; font-size: 13px;">
+            <span id="fsIcon">⛶</span> <span id="fsLabel">FULL</span>
+        </button>
+    </nav>
+
+
+    <!-- LIGHTBOX MODAL -->
+    <div id="lightboxModal" onclick="closeLightbox()">
+        <span class="close-lightbox-btn">&times;</span>
+        <div id="lightboxContent" onclick="event.stopPropagation()">
+            <img id="lightboxImage" src="" alt="Enlarged visual" style="display: none;">
+            <video id="lightboxVideo" src="" controls playsinline style="display: none;"></video>
+            <div id="lightboxCardContent" style="display: none; padding: 30px; background: #fff; max-width: 800px; border-radius: 12px;"></div>
+        </div>
+    </div>
+
+
+    <!-- PRESENTATION & LIGHTBOX CONTROLLER SCRIPT -->
+    <script>
+        // === LANGUAGE TOGGLER ===
+        let currentLang = 'id'; // default Indonesian
+        const WA_TEXT = {
+            en: 'https://wa.me/628986617589?text=Hi%20Abel%2C%20I%20have%20seen%20the%20Google%20Maps%20audit%20for%20Dr%20Ve%20Aesthetic%20Clinic.%20I%20would%20like%20to%20start%20the%20Business%20Booster.',
+            id: 'https://wa.me/628986617589?text=Halo%20Abel%2C%20saya%20sudah%20lihat%20audit%20Google%20Maps%20Dr%20Ve%20Aesthetic%20Clinic.%20Saya%20tertarik%20konsultasi%20Business%20Booster.'
+        };
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'id') ? 'en' : 'id';
+            document.documentElement.setAttribute('data-lang', currentLang);
+            document.getElementById('langLabel').textContent = (currentLang === 'id') ? 'ID ➔ EN' : 'EN ➔ ID';
+            const wa = document.getElementById('waLink');
+            if (wa) wa.href = WA_TEXT[currentLang];
+        }
+
+        // === VIDEO SWITCHER FOR SLIDE 01 ===
+        let currentSlide1Target = 'bhayangkara';
+        function currentSlide1VideoSrc() {
+            return currentSlide1Target === 'bhayangkara' ? 'assets/shot-02-klinik-bhayangkara.mp4' : 'assets/shot-03-klinik-sukabumi.mp4';
+        }
+
+        function switchVideoSlide1(target) {
+            currentSlide1Target = target;
+            const vid = document.getElementById('videoPlayerSlide1');
+            const cap = document.getElementById('videoCapSlide1');
+            const btnBhayangkara = document.getElementById('tabBtnBhayangkara');
+            const btnSukabumi = document.getElementById('tabBtnSukabumi');
+
+            if (target === 'bhayangkara') {
+                vid.poster = 'assets/shot-02-klinik-bhayangkara.webp';
+                vid.innerHTML = '<source src="assets/shot-02-klinik-bhayangkara.mp4" type="video/mp4"><source src="assets/shot-02-klinik-bhayangkara.webm" type="video/webm">';
+                vid.load();
+                vid.play().catch(() => {});
+                cap.innerHTML = '<span class="t-en">▶ Search: Klinik Kecantikan Jl. Bhayangkara &bull; Dr Metz #1 vs Dr Ve Hidden</span><span class="t-id">▶ Cari: Klinik Kecantikan Jl. Bhayangkara &bull; Dr Metz #1 vs Dr Ve Tenggelam</span>';
+                btnBhayangkara.classList.add('active');
+                btnSukabumi.classList.remove('active');
+            } else {
+                vid.poster = 'assets/shot-03-klinik-sukabumi.webp';
+                vid.innerHTML = '<source src="assets/shot-03-klinik-sukabumi.mp4" type="video/mp4"><source src="assets/shot-03-klinik-sukabumi.webm" type="video/webm">';
+                vid.load();
+                vid.play().catch(() => {});
+                cap.innerHTML = '<span class="t-en">▶ City-Wide Search: Klinik Kecantikan Sukabumi &bull; Top Leaders vs Dr Ve Absent</span><span class="t-id">▶ Pencarian Kota: Klinik Kecantikan Sukabumi &bull; Pemimpin Pasar vs Dr Ve Tidak Muncul</span>';
+                btnSukabumi.classList.add('active');
+                btnBhayangkara.classList.remove('active');
+            }
+        }
+
+        // === LIGHTBOX LOGIC ===
+        function openLightbox(src) {
+            const modal = document.getElementById('lightboxModal');
+            const img = document.getElementById('lightboxImage');
+            const vid = document.getElementById('lightboxVideo');
+
+            if (src && (src.endsWith('.webm') || src.endsWith('.mp4'))) {
+                img.style.display = 'none';
+                vid.style.display = 'block';
+                vid.src = src;
+                vid.play();
+            } else {
+                if (vid) { vid.style.display = 'none'; vid.pause(); }
+                img.style.display = 'block';
+                img.src = src;
+            }
+            modal.classList.add('open');
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightboxModal');
+            const vid = document.getElementById('lightboxVideo');
+            const cardContent = document.getElementById('lightboxCardContent');
+            if (vid) { vid.pause(); vid.src = ''; }
+            if (cardContent) { cardContent.innerHTML = ''; cardContent.style.display = 'none'; }
+            modal.classList.remove('open');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+                document.getElementById('fsIcon').textContent = '✕';
+                document.getElementById('fsLabel').textContent = 'EXIT';
+            } else {
+                document.exitFullscreen().catch(() => {});
+                document.getElementById('fsIcon').textContent = '⛶';
+                document.getElementById('fsLabel').textContent = 'FULL';
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const isFs = !!document.fullscreenElement;
+            document.getElementById('fsIcon').textContent = isFs ? '✕' : '⛶';
+            document.getElementById('fsLabel').textContent = isFs ? 'EXIT' : 'FULL';
+            if (window.deck) deck.handleResize();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        // === PRESENTATION ENGINE ===
+        class DeckPresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.stage = document.getElementById('deckStage');
+                this.counter = document.getElementById('counterDisplay');
+
+                let hashIndex = 0;
+                if (window.location.hash) {
+                    const parsed = parseInt(window.location.hash.replace('#', ''));
+                    if (!isNaN(parsed) && parsed >= 0 && parsed < this.slides.length) {
+                        hashIndex = parsed;
+                    }
+                }
+                this.currentSlide = hashIndex;
+                this.init();
+            }
+
+            init() {
+                this.handleResize();
+                window.addEventListener('resize', () => this.handleResize());
+                this.showSlide(this.currentSlide, false);
+
+                // Keyboard Navigation
+                document.addEventListener('keydown', (e) => {
+                    if (document.getElementById('lightboxModal').classList.contains('open')) return;
+                    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                        e.preventDefault();
+                        this.next();
+                    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                        e.preventDefault();
+                        this.prev();
+                    }
+                });
+
+                // Swipe Gesture
+                let touchStartX = 0;
+                let touchStartY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                    touchStartY = e.changedTouches[0].screenY;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    if (document.getElementById('lightboxModal').classList.contains('open')) return;
+                    const diffX = touchStartX - e.changedTouches[0].screenX;
+                    const diffY = touchStartY - e.changedTouches[0].screenY;
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                        if (diffX > 0) this.next();
+                        else this.prev();
+                    }
+                }, { passive: true });
+            }
+
+            handleResize() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                const scaleX = w / 1920;
+                const scaleY = h / 1080;
+                const scale = Math.min(scaleX, scaleY);
+                this.stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            }
+
+            showSlide(index, animate = true) {
+                if (index < 0 || index >= this.slides.length) return;
+                const prev = this.slides[this.currentSlide];
+                const next = this.slides[index];
+
+                this.slides.forEach((s, idx) => {
+                    if (idx !== index) {
+                        s.classList.remove('active');
+                        s.style.opacity = '0';
+                        s.style.visibility = 'hidden';
+                    }
+                });
+
+                next.classList.add('active');
+                next.style.visibility = 'visible';
+
+                if (animate && window.gsap) {
+                    gsap.fromTo(next, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' });
+                } else {
+                    next.style.opacity = '1';
+                }
+
+                // Autoplay video in current slide
+                const vids = next.querySelectorAll('video');
+                vids.forEach(v => {
+                    v.currentTime = 0;
+                    v.play().catch(() => {});
+                });
+
+                this.currentSlide = index;
+                window.location.hash = `#${index}`;
+                this.updateUI();
+            }
+
+            next() {
+                if (this.currentSlide < this.slides.length - 1) {
+                    this.showSlide(this.currentSlide + 1);
+                }
+            }
+
+            prev() {
+                if (this.currentSlide > 0) {
+                    this.showSlide(this.currentSlide - 1);
+                }
+            }
+
+            updateUI() {
+                const pad = (n) => String(n).padStart(2, '0');
+                this.counter.textContent = `${pad(this.currentSlide)} / ${pad(this.slides.length - 1)}`;
+                document.getElementById('prevBtn').style.opacity = (this.currentSlide === 0) ? '0.4' : '1';
+                document.getElementById('nextBtn').style.opacity = (this.currentSlide === this.slides.length - 1) ? '0.4' : '1';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.deck = new DeckPresentation();
+        });
+    </script>
+</body>
+</html>
